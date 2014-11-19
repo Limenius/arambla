@@ -1,0 +1,26 @@
+{
+    "name":         "limenius/arambla",
+    "type":         "library",
+    "description":  "A generator from RAML API specifications",
+    "keywords":     ["raml", "api", "generator"],
+    "homepage":     "http://limenius.com",
+    "license":      "MIT",
+    "authors":      [
+        {
+            "name":     "Limenius",
+            "homepage": "http://limenius.com"
+        },
+        {
+            "name":     "Nacho Martín",
+            "homepage": "http://nacho-martin.com"
+        }
+    ],
+    "require":      {
+        "php":  ">=5.3.0",
+        "symfony/yaml": "~2.4"
+    },
+    "autoload":     {
+        "psr-0": { "Limenius\\Arambla\\": "src/" }
+    },
+    "minimum-stability": "dev"
+}
