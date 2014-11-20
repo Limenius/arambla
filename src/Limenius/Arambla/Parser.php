@@ -3,6 +3,7 @@
 namespace Limenius\Arambla;
 
 use Limenius\Arambla\Exception\ParseException;
+use Limenius\Arambla\SchemasParser;
 
 class Parser
 {
@@ -25,6 +26,8 @@ class Parser
         $this->parseVersion($document);
         $this->parseBaseUri($document);
         $this->parseProtocols($document);
+        $this->parseMediaType($document);
+        $this->parseSchemas($document);
 
         return $this->specification;
 
@@ -84,7 +87,7 @@ class Parser
                 }
                 $protocols[] = $guessed;
             } else {
-                return;
+                $protocols[] = 'HTTP';
             }
         } else {
             $rawProtocols = $document['protocols'];
@@ -102,5 +105,29 @@ class Parser
         $this->specification['protocols'] = $protocols;
     }
 
+    private function parseMediaType($document)
+    {
+        // TODO: Validate media type
+        //baseUri is only required during production, optinal during development
+        if (!array_key_exists('mediaType', $document)) {
+            return;
+        }
+        $mediaType = $document['mediaType'];
+        if (!is_string($mediaType)) {
+            throw new ParseException('mediaType must be a string');
+        }
+
+        $this->specification['mediaType'] = $mediaType;
+    }
+
+    private function parseSchemas($document)
+    {
+        $schemasParser = new SchemasParser();
+        if (!array_key_exists('schemas', $document)) {
+            return;
+        }
+        $this->specification['schemas'] = $schemasParser->parse($document['schemas']);
+
+    }
 
 }

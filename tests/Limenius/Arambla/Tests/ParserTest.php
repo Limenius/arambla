@@ -45,6 +45,24 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         ], "\n"));
     }
 
+    public function testShouldSetHttpProtocolIfNotSpecified()
+    {
+        $parser = new Parser();
+        $document = $parser->load(join([
+            '#%RAML 0.8',
+            '---',
+            'title: MyApi',
+            'version: "1.0"',
+        ], "\n"));
+
+        $expected  = [
+            'title' => 'MyApi',
+            'version' => '1.0',
+            'protocols' => ['HTTP'],
+            ];
+        $this->assertEquals($expected, $document);
+    }
+
     public function testShouldParseVersion()
     {
         $parser = new Parser();
@@ -56,7 +74,8 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         ], "\n"));
         $expected  = [
             'title' => 'MyApi',
-            'version' => '1.0'
+            'version' => '1.0',
+            'protocols' => [ 'HTTP' ]
             ];
         $this->assertEquals($expected, $document);
     }
@@ -137,6 +156,30 @@ class ParserTest extends \PHPUnit_Framework_TestCase
             ];
         $this->assertEquals($expected, $document);
     }
+
+    public function testShouldParseMediaType()
+    {
+        $parser = new Parser();
+        $document = $parser->load(join([
+            '#%RAML 0.8',
+            '---',
+            'title: MyApi',
+            'baseUri: http://myapi.com',
+            'version: "1.0"',
+            'mediaType: application/json'
+        ], "\n"));
+
+        $expected  = [
+            'title' => 'MyApi',
+            'version' => '1.0',
+            'baseUri' => 'http://myapi.com',
+            'protocols' => ['HTTP'],
+            'mediaType' => 'application/json'
+            ];
+        $this->assertEquals($expected, $document);
+    }
+
+
     //public function testShouldLoadBasicInformation()
     //{
     //    $parser = new Parser();
@@ -159,8 +202,6 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     //        'protocols' => 'HTTP'
     //        ];
     //    $this->assertEquals($expected, $document);
-
-
     //}
 
 }
