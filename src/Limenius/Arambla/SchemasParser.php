@@ -3,6 +3,7 @@
 namespace Limenius\Arambla;
 
 use Limenius\Arambla\Exception\ParseException;
+use JsonSchema\Validator;
 
 class SchemasParser
 {
@@ -28,20 +29,45 @@ class SchemasParser
             if (!is_array($schemaSpecArray)) {
                 throw new ParseException('schemas must be an array of maps');
             }
-            foreach ($schemaSpecArray as $schemaSpec) {
-                $this->parseSingleSchema($schemaSpec);
+            foreach ($schemaSpecArray as $key => $schemeSpec) {
+                $this->schemas[$key] = $this->parseSingleSchema($schemeSpec);
             }
         }
 
-        $this->specification['schemas'] = $schemasSpec;
         return $this->schemas;
     }
 
-    public function parseSingleSchema($schemaSpec)
+    public function parseSingleSchema($schemeSpec)
     {
-        if ($schemaSpec === null) {
-            throw new ParseException('schemas must not be empty');
+        if ($schemeSpec === null) {
+            throw new ParseException('scheme must not be empty');
         }
+        if (!is_string($schemeSpec)) {
+            throw new ParseException('scheme must be a string');
+        }
+
+        $schemaJson = json_decode($schemeSpec);
+        if (json_last_error() == JSON_ERROR_NONE) {
+            $schemeUri = $schemaJson->{'$schema'};
+            $retriever = new \JsonSchema\Uri\UriRetriever;
+            $scheme = $retriever->retrieve($schemeUri);
+            $validator = new Validator();
+            $validator->check($schemaJson, $scheme);
+            if ($validator->isValid()) {
+                $arrayScheme = json_decode($schemeSpec, true);
+                unset($arrayScheme['$schema']);
+                return $arrayScheme;
+            } else {
+                foreach ($validator->getErrors() as $error) {
+                    echo sprintf("[%s] %s\n", $error['property'], $error['message']);
+                }
+            }
+        }
+
+    }
+
+    private function isJson($string) {
+        json_decode($string);
+        return (json_last_error() == JSON_ERROR_NONE);
     }
 }
-

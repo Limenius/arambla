@@ -4,6 +4,7 @@ namespace Limenius\Arambla;
 
 use Limenius\Arambla\Exception\ParseException;
 use Limenius\Arambla\SchemasParser;
+use Limenius\Arambla\DocumentCompser;
 
 class Parser
 {
@@ -17,10 +18,11 @@ class Parser
     public function load($input)
     {
         $version = strtok($input, "\n");
-        if (!preg_match('/#%RAML 0.8/',trim($version))) {
+        if (!preg_match('/#%RAML 0.8/', trim($version))) {
             throw new ParseException('Document must start with #%RAML 0.8');
         }
-        $document = \Symfony\Component\Yaml\Yaml::parse($input);
+        $documentComposer = new DocumentComposer();
+        $document = $documentComposer->buildTree($input);
 
         $this->parseTitle($document);
         $this->parseVersion($document);
@@ -129,5 +131,4 @@ class Parser
         $this->specification['schemas'] = $schemasParser->parse($document['schemas']);
 
     }
-
 }
